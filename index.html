@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>mamansuntik</title>
+<meta name="color-scheme" content="light">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23c2410c'/%3E%3Cpath d='M8 23V10l8 8 8-8v13' fill='none' stroke='%23fff' stroke-width='3' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/app.css">
+</head>
+<body>
+
+<section id="login" class="login" hidden>
+  <form id="loginForm" class="login-card" autocomplete="on">
+    <div class="wordmark big"><span class="mark"></span>mamansuntik</div>
+    <p class="muted">Masuk untuk memesan dan memantau pesanan.</p>
+    <label for="pw">Kata sandi</label>
+    <input id="pw" type="password" autocomplete="current-password" required autofocus>
+    <p id="loginErr" class="err" role="alert"></p>
+    <button class="btn" type="submit">Masuk</button>
+  </form>
+</section>
+
+<div id="app" hidden>
+  <header class="top">
+    <div class="wrap top-in">
+      <a href="#pesan" class="wordmark"><span class="mark"></span>mamansuntik</a>
+      <nav id="nav">
+        <a href="#pesan" data-v="pesan">Pesan</a>
+        <a href="#layanan" data-v="layanan">Layanan</a>
+        <a href="#pesanan" data-v="pesanan">Pesanan</a>
+      </nav>
+      <div class="top-r">
+        <span class="bal" id="bal" title="Saldo di penyedia"></span>
+        <button class="link" id="logout" type="button">Keluar</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div id="banner" class="banner" hidden></div>
+
+    <section id="v-pesan" class="view" hidden>
+      <h1>Pesan baru</h1>
+      <div class="split">
+        <form id="orderForm" class="card" novalidate>
+          <div class="step"><span>1</span>Pilih layanan</div>
+          <div class="field">
+            <label for="cat">Kategori</label>
+            <select id="cat"></select>
+          </div>
+          <div class="field">
+            <label for="svc">Layanan</label>
+            <select id="svc"></select>
+          </div>
+          <dl id="svcInfo" class="facts"></dl>
+
+          <div class="step"><span>2</span>Isi detail pesanan</div>
+          <div class="field">
+            <label for="link">Tautan</label>
+            <input id="link" type="url" inputmode="url" placeholder="https://" required>
+          </div>
+
+          <div class="field" id="f-qty">
+            <label for="qty">Jumlah</label>
+            <input id="qty" type="number" inputmode="numeric" min="1" step="1">
+            <small id="qtyHint" class="muted"></small>
+          </div>
+          <div class="field" id="f-comments" hidden>
+            <label for="comments">Komentar, satu per baris</label>
+            <textarea id="comments" rows="5"></textarea>
+            <small id="cmHint" class="muted"></small>
+          </div>
+          <div class="field" id="f-user" hidden>
+            <label for="uname">Nama pengguna</label>
+            <input id="uname" type="text" autocomplete="off">
+          </div>
+
+          <details id="drip" class="drip">
+            <summary>Pengiriman bertahap (opsional)</summary>
+            <div class="two">
+              <div class="field"><label for="runs">Jumlah kali kirim</label><input id="runs" type="number" min="1" inputmode="numeric"></div>
+              <div class="field"><label for="interval">Jeda, menit</label><input id="interval" type="number" min="1" inputmode="numeric"></div>
+            </div>
+          </details>
+
+          <p id="orderErr" class="err" role="alert"></p>
+          <button class="btn" id="orderBtn" type="submit">Kirim pesanan</button>
+        </form>
+
+        <aside class="card sum" id="sum">
+          <h2>Ringkasan</h2>
+          <dl class="facts">
+            <div><dt>Layanan</dt><dd id="s-name">-</dd></div>
+            <div><dt>Tarif per 1.000</dt><dd id="s-rate" class="num">-</dd></div>
+            <div><dt>Jumlah</dt><dd id="s-qty" class="num">-</dd></div>
+          </dl>
+          <div class="total"><span>Perkiraan biaya</span><strong id="s-total" class="num">-</strong></div>
+          <p class="muted small">Biaya akhir dihitung penyedia saat pesanan masuk.</p>
+        </aside>
+      </div>
+    </section>
+
+    <section id="v-layanan" class="view" hidden>
+      <h1>Layanan</h1>
+      <div class="bar">
+        <input id="q" type="search" placeholder="Cari nama atau ID layanan" aria-label="Cari layanan">
+        <select id="qcat" aria-label="Filter kategori"></select>
+        <span id="count" class="muted"></span>
+      </div>
+      <div class="table-wrap">
+        <table id="svcTable">
+          <thead><tr><th>ID</th><th>Layanan</th><th>Kategori</th><th class="r">Tarif / 1.000</th><th class="r">Min</th><th class="r">Maks</th><th>Fitur</th><th></th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="v-pesanan" class="view" hidden>
+      <h1>Pesanan</h1>
+      <div class="bar">
+        <form id="lookup" class="inline">
+          <input id="lookId" type="text" inputmode="numeric" placeholder="Lacak dengan ID pesanan" aria-label="ID pesanan">
+          <button class="btn ghost" type="submit">Lacak</button>
+        </form>
+        <button class="btn ghost" id="refresh" type="button">Perbarui status</button>
+      </div>
+      <div class="table-wrap">
+        <table id="ordTable">
+          <thead><tr><th>ID</th><th>Layanan</th><th>Tautan</th><th class="r">Jumlah</th><th>Status</th><th class="r">Sisa</th><th class="r">Biaya</th><th></th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <p id="ordEmpty" class="empty" hidden>Belum ada pesanan di perangkat ini.</p>
+      <p class="muted small">Daftar ini disimpan di browser Anda. Pesanan dari perangkat lain bisa ditambahkan lewat kolom lacak.</p>
+    </section>
+  </main>
+</div>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<script src="/app.js"></script>
+</body>
+</html>
